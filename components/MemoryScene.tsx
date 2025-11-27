@@ -28,7 +28,6 @@ const PhotoFrame = ({ data, index }: { data: PhotoData, index: number }) => {
         color="white"
         anchorX="center"
         maxWidth={2}
-        font="https://fonts.gstatic.com/s/montserrat/v25/JTUSjIg1_i6t8kCHKm459Wlhyw.woff"
       >
         {data.caption}
       </Text>
@@ -37,7 +36,6 @@ const PhotoFrame = ({ data, index }: { data: PhotoData, index: number }) => {
         fontSize={0.1}
         color="#ffb7b2"
         anchorX="center"
-        font="https://fonts.gstatic.com/s/dancingscript/v24/If2RXTr6YS-zF4S-kcSWSVi_sxjsohD9F50.woff"
       >
         {data.date}
       </Text>
@@ -72,7 +70,6 @@ const MemoryLane = ({ setAppState }: Props) => {
         position={[0, 0, -25]}
         fontSize={0.5}
         color="#ffcc00"
-        font="https://fonts.gstatic.com/s/dancingscript/v24/If2RXTr6YS-zF4S-kcSWSVi_sxjsohD9F50.woff"
       >
         Our Future Awaits...
       </Text>

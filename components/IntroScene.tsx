@@ -13,8 +13,8 @@ const IntroScene: React.FC<Props> = ({ setAppState }) => {
   const [clicked, setClicked] = useState(false);
   const [hovered, setHovered] = useState(false);
 
-  // Generate Heart Points
-  const particles = useMemo(() => {
+  // Generate Heart Points using explicit BufferGeometry to avoid mounting issues
+  const geometry = useMemo(() => {
     const count = 4000;
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
@@ -42,7 +42,10 @@ const IntroScene: React.FC<Props> = ({ setAppState }) => {
       colors[i * 3 + 2] = color.b;
     }
     
-    return { positions, colors };
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    return geo;
   }, []);
 
   useFrame((state, delta) => {
@@ -60,13 +63,15 @@ const IntroScene: React.FC<Props> = ({ setAppState }) => {
         pointsRef.current.scale.z += delta * 15;
         
         const material = pointsRef.current.material as THREE.PointsMaterial;
-        material.opacity -= delta * 1.5;
-        
-        // Move camera forward into the "portal"
-        state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, 0, delta * 3);
+        if (material) {
+            material.opacity = THREE.MathUtils.lerp(material.opacity, 0, delta * 3);
+            
+            // Move camera forward into the "portal"
+            state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, 0, delta * 3);
 
-        if (material.opacity <= 0) {
-           setAppState(AppState.MEMORIES);
+            if (material.opacity <= 0.05) {
+               setAppState(AppState.MEMORIES);
+            }
         }
       }
     }
@@ -81,32 +86,20 @@ const IntroScene: React.FC<Props> = ({ setAppState }) => {
       <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
         <points 
           ref={pointsRef} 
+          geometry={geometry}
           onClick={handleClick}
           onPointerOver={() => setHovered(true)}
           onPointerOut={() => setHovered(false)}
         >
-          <bufferGeometry>
-            <bufferAttribute
-              attach="attributes-position"
-              count={particles.positions.length / 3}
-              array={particles.positions}
-              itemSize={3}
-            />
-            <bufferAttribute
-              attach="attributes-color"
-              count={particles.colors.length / 3}
-              array={particles.colors}
-              itemSize={3}
-            />
-          </bufferGeometry>
           <pointsMaterial
-            size={0.06}
+            size={0.08}
             vertexColors
             transparent
             opacity={1}
             sizeAttenuation
             depthWrite={false}
             blending={THREE.AdditiveBlending}
+            toneMapped={false}
           />
         </points>
       </Float>
@@ -114,9 +107,8 @@ const IntroScene: React.FC<Props> = ({ setAppState }) => {
       {!clicked && (
         <Text
           position={[0, -2.5, 0]}
-          fontSize={0.2}
+          fontSize={0.25}
           color="#ffb7b2"
-          font="https://fonts.gstatic.com/s/dancingscript/v24/If2RXTr6YS-zF4S-kcSWSVi_sxjsohD9F50.woff"
           anchorX="center"
           anchorY="middle"
           fillOpacity={hovered ? 1 : 0.7}
